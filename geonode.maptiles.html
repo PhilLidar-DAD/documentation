@@ -279,33 +279,75 @@
 <dl class="function">
 <dt id="geonode.maptiles.views.georefs_datasize">
 <code class="descclassname">geonode.maptiles.views.</code><code class="descname">georefs_datasize</code><span class="sig-paren">(</span><em>request</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geonode.maptiles.views.georefs_datasize" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Function for showing the data size of a georef</p>
+<p>Function to retrieve data size of each georef, see maptiles_geoext_map.html</p>
+<dl class="docutils">
+<dt>URLs:</dt>
+<dd>url(r’^datasize/?$’, views.georefs_datasize),</dd>
+</dl>
+</dd></dl>
 
 <dl class="function">
 <dt id="geonode.maptiles.views.georefs_validation">
 <code class="descclassname">geonode.maptiles.views.</code><code class="descname">georefs_validation</code><span class="sig-paren">(</span><em>request</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geonode.maptiles.views.georefs_validation" title="Permalink to this definition">¶</a></dt>
-<dd><p>Note: does not check yet if tiles to be added are unique (or are not yet included in the cart)</p>
+<dd><p>Check if user has exceeded the limit for downloads as specified in the local settings</p>
+<p>This functions validates if the user’s size to be added to cart &lt;total_size&gt; + cart’s total size &lt;cart_total_size&gt; + FTPRequests since midnight &lt;request_size_mn&gt; exceeds the size limit &lt;settings.SELECTION_LIMIT&gt;</p>
+<dl class="docutils">
+<dt>Triggers:</dt>
+<dd><cite>georef_form</cite> is submitted, also see maptiles_geoext_map.html</dd>
+<dt>URLs:</dt>
+<dd>url(r’^validate/?$’, views.georefs_validation),</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="geonode.maptiles.views.process_georefs">
 <code class="descclassname">geonode.maptiles.views.</code><code class="descname">process_georefs</code><span class="sig-paren">(</span><em>request</em><span class="sig-paren">)</span><a class="headerlink" href="#geonode.maptiles.views.process_georefs" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Process the georefs submitted by the user, then redirect to cart</p>
+<dl class="docutils">
+<dt>This function handles the checking of selected tiles, &lt;submitted_georef_list&gt;, if they are listed in the tiles within the user’s jurisdiction, &lt;jurisdiction_georefs&gt;.</dt>
+<dd>The intersection of the two mentioned list is stored to &lt;georef_list&gt;.
+The tiles within the user’s jurisdiction is listed in the Cephgeo.UserTiles model as gridref_list column.
+If the user does not have a Cephgeo.UserTiles entry, this raises PermissionDenied</dd>
+</dl>
+<p>Then filters data classes depending on the selected data classes, by removing unselected data classes in Q
+Then gets the filtered georef in CephDataObject.
+Then it adds it to cart using cart_utils’s add_to_cart_unique, which checks if it has a duplicate, then it doesnt add it, if no duplicate, then it adds it.
+Then this also outputs a message of the status of the selected georefs; if with duplicates, empty georef, or succesful.</p>
+<dl class="docutils">
+<dt>Triggers:</dt>
+<dd><cite>georef_form</cite> is submitted, also see maptiles_map.html and maptiles_geoext_map.html</dd>
+<dt>URLs:</dt>
+<dd>url(r’^addtocart/?$’, views.process_georefs),</dd>
+</dl>
+</dd></dl>
 
 <dl class="function">
 <dt id="geonode.maptiles.views.province_lookup">
 <code class="descclassname">geonode.maptiles.views.</code><code class="descname">province_lookup</code><span class="sig-paren">(</span><em>request</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geonode.maptiles.views.province_lookup" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Function for looking up the municipalities within a province</p>
+<p>NOTE DOES NOT WORK, needs to migrate registration models, questionable code (check the appends)</p>
+<dl class="docutils">
+<dt>URLs:</dt>
+<dd>url(r’^provinces/?$’, views.province_lookup),
+url(r’^provinces/(?P&lt;province&gt;[^/]*)$’, views.province_lookup),</dd>
+</dl>
+</dd></dl>
 
 <dl class="function">
 <dt id="geonode.maptiles.views.tiled_view">
 <code class="descclassname">geonode.maptiles.views.</code><code class="descname">tiled_view</code><span class="sig-paren">(</span><em>request</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#geonode.maptiles.views.tiled_view" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="geonode.maptiles.views.tiled_view2">
-<code class="descclassname">geonode.maptiles.views.</code><code class="descname">tiled_view2</code><span class="sig-paren">(</span><em>request</em>, <em>overlay='geonode:philgrid_1'</em>, <em>template='maptiles/maptiles_map2.html'</em>, <em>test_mode=False</em>, <em>jurisdiction=None</em><span class="sig-paren">)</span><a class="headerlink" href="#geonode.maptiles.views.tiled_view2" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Gives the configurations for the map in data tiles</p>
+<p>This function generates the layer configuration details required for the map view.
+Returns the template with the configuration details as context
+For form details and page layout, see maptiles_geoext_map.html and maptiles_map.html</p>
+<dl class="docutils">
+<dt>URLs:</dt>
+<dd>url(r’^/?$’, views.tiled_view, name=’maptiles_main’),
+url(r’^test/?$’, views.tiled_view, { “overlay”: settings.TILED_SHAPEFILE ,”test_mode”:True} ),
+url(r’^interest=(?P&lt;interest&gt;[^/]*)$’, views.tiled_view, {“overlay”: settings.TILED_SHAPEFILE_TEST}),</dd>
+</dl>
+</dd></dl>
 
 </div>
 <div class="section" id="module-geonode.maptiles">
